@@ -12,7 +12,9 @@ function ListContact(props) {
   }, []);
   
   const deleting =async(id) =>{
+    if (window.confirm("Delete the item?")) {
     await props.deleteData(id);
+    }
   }
 
   return (
