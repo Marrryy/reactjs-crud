@@ -119,7 +119,7 @@ const image = (a)=>{
 }
 
 const mapDispatchToProps = dispatch => ({
-  editData: (newData) => dispatch(editData(newData))
+  editData: (id, newData) => dispatch(editData(id, newData))
 });
 
 export default connect(null,mapDispatchToProps)(EditContact);
