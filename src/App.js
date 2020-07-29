@@ -14,7 +14,7 @@ function App() {
     <Provider store={store}>
       <Router>
         <Switch>
-          <Route path="/home" component={listContact} />
+          <Route exact path="/" component={listContact} />
           <Route path="/add" component={postContact} />
           <Route path="/edit/:id?" component={editContact} />
         </Switch>

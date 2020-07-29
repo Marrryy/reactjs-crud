@@ -1,25 +1,53 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import {
   CardContent,Typography,CardMedia, AppBar, Toolbar, 
   Grid, FormControl, Button, Card, CardActions, InputLabel, Input
 } from '@material-ui/core';
 
+import {postData} from '../actions/contact';
 
 function PostContact(props) {
 const [contact, setContact] = React.useState({
-  firstName: "",
-  lastname: "",
-  age: "",
-  photo: ""
+  firstName: "aaa",
+  lastname: "aaaa",
+  age: 1
 });
+const [photo, setPhoto] = React.useState({});
+const [base64, setBase64] = React.useState("");
 
+const image = (a)=>{
+  const b= a.target.files[0]; 
 
-  const change=(i, v)=> {
-    setContact(c => 
-      { c[i] = v; 
-      return { ...c }; })
+  let reader = new FileReader();
+  reader.readAsDataURL(b);
+  reader.onloadend = () => {
+    setPhoto(b);
+    setBase64(reader.result)
+  };
+
+}
+
+const change=(i, v)=> {
+  setContact(c => 
+    { c[i] = v; 
+    return { ...c }; })
+}
+const posting = async(firstName,  lastName, age ,base64) => {
+  try{
+    if(base64 == ""){
+      base64="N/A"
+    }
+    const newData = {
+      firstName,  lastName, age , photo:base64
+    }
+    props.postData(newData);
+    // if(res)  props.history.push('/');
   }
+  catch(e){
+    console.log(e)
+  } 
+}
   return (
     <Grid container justify="center" alignItems="center">
     
@@ -39,7 +67,7 @@ const [contact, setContact] = React.useState({
 
     <Grid item>
 
-    <Button color="inherit" style={{float:'right'}}  onClick={()=>{props.history.push('/home')}}>Home</Button>
+    <Button color="inherit" style={{float:'right'}}  onClick={()=>{props.history.push('/')}}>Home</Button>
     </Grid>
     </Grid>
 
@@ -70,16 +98,21 @@ const [contact, setContact] = React.useState({
             onChange={(e)=>{change("age", e.target.value)}}
           />
     </FormControl>
+
+    <img style={{ height: 150,width: 150, objectFit: 'cover'}} src={base64} alt="Nothing here"/>
+
     <FormControl fullWidth>
-          <InputLabel htmlFor="standard-adornment-amount">Url Picture</InputLabel>
+    <input type="file" name="image" accept="image/*" onChange={(e)=>image(e)}/>
+          {/* <InputLabel htmlFor="standard-adornment-amount">Url Picture</InputLabel>
           <Input
             value={contact.photo}
             onChange={(e)=>{change("photo", e.target.value)}}
-          />
+          /> */}
     </FormControl>
 
     <FormControl>
-    <Button color="inherit"  onClick={()=>{props.history.push('/home')}}>Submit</Button>
+    <Button color="inherit"  onClick={()=>{
+      posting(contact.firstName, contact.lastname, contact.age ,base64)}}>Submit</Button>
 
     </FormControl>
 
@@ -89,4 +122,8 @@ const [contact, setContact] = React.useState({
   );
 }
 
-export default PostContact;
+const mapDispatchToProps = dispatch => ({
+  postData: (newData) => dispatch(postData(newData))
+});
+
+export default connect(null,mapDispatchToProps)(PostContact);

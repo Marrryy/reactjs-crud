@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
-import { getData } from '../actions/contact';
+import { getData, deleteData } from '../actions/contact';
 import {
   CardContent,Typography,CardMedia, AppBar, Toolbar, 
   Grid, FormControl, Button, Card, CardActions
@@ -10,6 +10,11 @@ function ListContact(props) {
   useEffect(() => {
     props.getData();
   }, []);
+  
+  const deleting =async(id) =>{
+    await props.deleteData(id);
+  }
+
   return (
     <Grid container justify="center" alignItems="center">
     
@@ -42,13 +47,23 @@ function ListContact(props) {
 
     {
       props.contacts && props.contacts.data.map((data, i) =>
+      {
+        let urlphoto = "";
+        if(data.photo == "N/A"){
+          urlphoto= "../../public/no-image.jpg"
+        }else{
+          urlphoto=data.photo
+        }
+        return (
       <Card key={i} style={{width:'100%', margin:20}}>
       <Grid container justify="center" alignItems="center">
       <Grid item xs={3}>
-      <CardMedia style={{width: 100}}
-          image={data.photo}
-          title="Paella dish"
-        />
+      <CardContent>
+      
+      <img style={{ height: 150,width: 150, objectFit: 'cover'}}  src={urlphoto} alt="Nothing here"/>
+
+      </CardContent>
+          
       </Grid>
       <Grid item xs={6}>
       <CardContent>
@@ -61,13 +76,14 @@ function ListContact(props) {
         </CardContent>
         <CardActions>
         <Button size="small" onClick={()=>{props.history.push('/edit',{ id:data.id, data })}}>Edit</Button>
-        <Button size="small" onClick={()=>{}}>Delete</Button>
+        <Button size="small" onClick={()=>{deleting(data.id);}}>Delete</Button>
       </CardActions>
       </Grid>
       </Grid>
   
   
       </Card>
+      );}
       )
     }
 
@@ -80,6 +96,8 @@ const mapStateToProps = ({ data }) => {
   return { contacts : data.contacts }
 };
 const mapDispatchToProps = dispatch => ({
-  getData: () => dispatch(getData())
+  getData: () => dispatch(getData()),
+  deleteData: (id) => dispatch(deleteData(id))
+  
 });
 export default connect(mapStateToProps, mapDispatchToProps)(ListContact);

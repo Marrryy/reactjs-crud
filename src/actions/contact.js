@@ -6,7 +6,7 @@ import {
 
 export const getData = () =>{
   return async dispatch => {
-    const {data} = (await axios.get(`/contact`)).data;
+    const {data} = (await axios.get(`contact`)).data;
     dispatch({
       type: GET_CONTACT,
       payload: { data }
@@ -15,18 +15,31 @@ export const getData = () =>{
 }
 export const postData = (newData) =>{
   return async dispatch => {
-    const {data} = (await axios.post(`/contact`,newData)).data;
-    getData();
-  }
-}
-export const updateData = (newData) =>{
+  try{
+    const a = await axios.post(`contact`,newData);
+    console.log(a);
+    dispatch(getData());
+  }catch(e){
+    console.log(e)
+  }}
+};
+
+export const editData = (id,newData) => {
   return async dispatch => {
-    const {data} = (await axios.put(`/contact`,newData)).data;
-    getData();
+  try{
+    await axios.put(`contact/${id}`,newData);
+    dispatch(getData());
+  }catch(e){
+    console.log(e)
   }
-}
-export const deleteData = (id) =>{
+}}
+export const deleteData = (id) => {
   return async dispatch => {
-    const {data} = (await axios.delete(`/contact`, id)).data;
+  try{
+    await axios.delete(`contact/${id}`);
+    dispatch(getData());
+  }catch(e){
+    console.log(e)
+  }
   }
 }

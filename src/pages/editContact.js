@@ -4,26 +4,48 @@ import {
   CardContent,Typography,CardMedia, AppBar, Toolbar, 
   Grid, FormControl, Button, Card, CardActions, InputLabel, Input
 } from '@material-ui/core';
+import {editData} from '../actions/contact';
 
 
-function PostContact(props) {
+function EditContact(props) {
 
-  const id = props.location.state.id;
   const data = props.location.state.data;
-console.log(props)
 const [contact, setContact] = React.useState({
-  firstName: "",
-  lastname: "",
-  age: "",
-  photo: ""
+  firstName: data.firstName,
+  lastName: data.lastName,
+  age: data.age,
+  photo: data.photo
 });
 
+const [photo, setPhoto] = React.useState({});
+const [base64, setBase64] = React.useState(data.photo);
+
+const image = (a)=>{
+  const b= a.target.files[0]; 
+
+  let reader = new FileReader();
+  reader.readAsDataURL(b);
+  reader.onloadend = () => {
+    setPhoto(b);
+    setBase64(reader.result)
+  };
+
+}
 
   const change=(i, v)=> {
     setContact(c => 
       { c[i] = v; 
       return { ...c }; })
   }
+
+  const editing = async(id,firstName,  lastName, age ,base64) => {
+    const newData = {
+      firstName,  lastName, age , photo:base64
+    }
+    const res = await props.editData(id, newData);
+    if(res)  props.history.push('/');
+  }
+
   return (
     <Grid container justify="center" alignItems="center">
     
@@ -37,13 +59,13 @@ const [contact, setContact] = React.useState({
     >
     <Grid item>
     <Typography variant="h5" component="h2">
-      Add Contact
+      Edit Contact
     </Typography>
     </Grid>
 
     <Grid item>
 
-    <Button color="inherit" style={{float:'right'}}  onClick={()=>{props.history.push('/home')}}>Home</Button>
+    <Button color="inherit" style={{float:'right'}}  onClick={()=>{props.history.push('/')}}>Home</Button>
     </Grid>
     </Grid>
 
@@ -63,7 +85,7 @@ const [contact, setContact] = React.useState({
     <FormControl fullWidth>
           <InputLabel htmlFor="standard-adornment-amount">Last Name</InputLabel>
           <Input
-            value={contact.lastname}
+            value={contact.lastName}
             onChange={(e)=>{change("lastname", e.target.value)}}
           />
     </FormControl>
@@ -74,16 +96,19 @@ const [contact, setContact] = React.useState({
             onChange={(e)=>{change("age", e.target.value)}}
           />
     </FormControl>
+    <img style={{ height: 150,width: 150, objectFit: 'cover'}} src={base64} alt="Nothing here"/>
     <FormControl fullWidth>
-          <InputLabel htmlFor="standard-adornment-amount">Url Picture</InputLabel>
+    <input type="file" name="image" accept="image/*" onChange={(e)=>image(e)}/>
+          {/* <InputLabel htmlFor="standard-adornment-amount">Url Picture</InputLabel>
           <Input
             value={contact.photo}
             onChange={(e)=>{change("photo", e.target.value)}}
-          />
+          /> */}
     </FormControl>
 
+
     <FormControl>
-    <Button color="inherit"  onClick={()=>{props.history.push('/home')}}>Submit</Button>
+    <Button color="inherit"  onClick={()=>{editing(data.id,contact.firstName,  contact.lastName, contact.age ,base64)}}>Submit</Button>
 
     </FormControl>
 
@@ -93,4 +118,8 @@ const [contact, setContact] = React.useState({
   );
 }
 
-export default PostContact;
+const mapDispatchToProps = dispatch => ({
+  editData: (newData) => dispatch(editData(newData))
+});
+
+export default connect(null,mapDispatchToProps)(EditContact);
