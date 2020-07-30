@@ -2,8 +2,8 @@ import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { getData, deleteData } from '../actions/contact';
 import {
-  CardContent,Typography,CardMedia, AppBar, Toolbar, 
-  Grid, FormControl, Button, Card, CardActions
+  CardContent,Typography, AppBar, Toolbar, 
+  Grid, Button, Card, CardActions
 } from '@material-ui/core';
 
 function ListContact(props) {
@@ -26,7 +26,7 @@ function ListContact(props) {
   <Grid
       justify="space-between" // Add it here :)
       container 
-      spacing={24}
+      spacing={4}
     >
     <Grid item>
     <Typography variant="h5" component="h2">
@@ -51,7 +51,7 @@ function ListContact(props) {
       props.contacts && props.contacts.data.map((data, i) =>
       {
         let urlphoto = "";
-        if(data.photo == "N/A"){
+        if(data.photo === "N/A"){
           urlphoto= "../../public/no-image.jpg"
         }else{
           urlphoto=data.photo

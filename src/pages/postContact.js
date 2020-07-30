@@ -1,53 +1,67 @@
-import React from 'react';
+import React,{useRef} from 'react';
 import { connect } from 'react-redux';
 import {
-  CardContent,Typography,CardMedia, AppBar, Toolbar, 
-  Grid, FormControl, Button, Card, CardActions, InputLabel, Input
+  Typography, AppBar, Toolbar, 
+  Grid, FormControl, Button,  InputLabel, Input
 } from '@material-ui/core';
 
+import SimpleReactValidator from 'simple-react-validator';
 import {postData} from '../actions/contact';
+import {useForceUpdate} from '../utils/forceUpdate';
+
 
 function PostContact(props) {
-const [contact, setContact] = React.useState({
-  firstName: "aaa",
-  lastname: "aaaa",
-  age: 1
-});
-const [photo, setPhoto] = React.useState({});
-const [base64, setBase64] = React.useState("");
 
-const image = (a)=>{
-  const b= a.target.files[0]; 
+ const validator = useRef(new SimpleReactValidator())
+ const forceUpdate = useForceUpdate();
 
-  let reader = new FileReader();
-  reader.readAsDataURL(b);
-  reader.onloadend = () => {
-    setPhoto(b);
-    setBase64(reader.result)
-  };
 
-}
+ const [contact, setContact] = React.useState({
+    firstName: "",
+    lastName: "",
+    age: 0
+  });
+// const [photo, setPhoto] = React.useState({});
+  const [base64, setBase64] = React.useState("");
 
-const change=(i, v)=> {
-  setContact(c => 
-    { c[i] = v; 
-    return { ...c }; })
-}
-const posting = async(firstName,  lastName, age ,base64) => {
+  const image = (a)=>{
+    const b= a.target.files[0]; 
+
+    let reader = new FileReader();
+    reader.readAsDataURL(b);
+    reader.onloadend = () => {
+      // setPhoto(b);
+      setBase64(reader.result)
+    };
+
+  }
+
+  const change=(i, v)=> {
+    setContact(c => 
+      { c[i] = v; 
+      return { ...c }; })
+  }
+  const posting = async(firstName,  lastName, age ,base64) => {
   try{
-    if(base64 == ""){
+    if (validator.current.allValid()) {
+    if(base64 === ""){
       base64="N/A"
     }
     const newData = {
       firstName,  lastName, age , photo:base64
     }
-    props.postData(newData);
-    // if(res)  props.history.push('/');
+    const res = await props.postData(newData);
+    if(res)  props.history.push('/');
+  } else {
+    validator.current.showMessages();
+    forceUpdate();
+  }
+
   }
   catch(e){
     console.log(e)
   } 
-}
+  }
   return (
     <Grid container justify="center" alignItems="center">
     
@@ -80,40 +94,49 @@ const posting = async(firstName,  lastName, age ,base64) => {
     <FormControl fullWidth >
           <InputLabel htmlFor="standard-adornment-amount">First Name</InputLabel>
           <Input
+            name="firstName"
             value={contact.firstName}
             onChange={(e)=>{change("firstName", e.target.value)} }
           />
     </FormControl>
+    <div style={{color:"Red", fontSize: "12px"}}>
+          {validator.current.message('firstName',contact.firstName, 'required|min:3')}
+    </div>
     <FormControl fullWidth>
           <InputLabel htmlFor="standard-adornment-amount">Last Name</InputLabel>
           <Input
-            value={contact.lastname}
-            onChange={(e)=>{change("lastname", e.target.value)}}
+            name="lastName"
+            value={contact.lastName}
+            onChange={(e)=>{change("lastName", e.target.value)}}
           />
     </FormControl>
+    <div style={{color:"Red", fontSize: "12px"}}>
+
+          {validator.current.message('lastName',contact.lastName, 'required|min:3')}
+          </div>
     <FormControl fullWidth>
           <InputLabel htmlFor="standard-adornment-amount">Age</InputLabel>
           <Input
+            name="age"
             value={contact.age}
-            onChange={(e)=>{change("age", e.target.value)}}
-          />
+            onChange={(e)=>{
+              change("age", e.target.value)
+            }}
+            />
     </FormControl>
+                <div style={{color:"Red", fontSize: "12px"}}>
+            {validator.current.message('age',contact.age, 'required|numeric')}
+            </div>
 
     <img style={{ height: 150,width: 150, objectFit: 'cover'}} src={base64} alt="Nothing here"/>
 
     <FormControl fullWidth>
     <input type="file" name="image" accept="image/*" onChange={(e)=>image(e)}/>
-          {/* <InputLabel htmlFor="standard-adornment-amount">Url Picture</InputLabel>
-          <Input
-            value={contact.photo}
-            onChange={(e)=>{change("photo", e.target.value)}}
-          /> */}
     </FormControl>
 
     <FormControl>
     <Button color="inherit"  onClick={()=>{
-      posting(contact.firstName, contact.lastname, contact.age ,base64)}}>Submit</Button>
-
+      posting(contact.firstName, contact.lastName, contact.age ,base64)}}>Submit</Button>
     </FormControl>
 
 

@@ -16,9 +16,9 @@ export const getData = () =>{
 export const postData = (newData) =>{
   return async dispatch => {
   try{
-    const a = await axios.post(`contact`,newData);
-    console.log(a);
+    await axios.post(`contact`,newData);
     dispatch(getData());
+    return true;
   }catch(e){
     console.log(e)
   }}
@@ -29,6 +29,7 @@ export const editData = (id,newData) => {
   try{
     await axios.put(`contact/${id}`,newData);
     dispatch(getData());
+    return true;
   }catch(e){
     console.log(e)
   }

@@ -1,13 +1,16 @@
-import React, { useEffect } from 'react';
+import React,{useRef} from 'react';
 import { connect } from 'react-redux';
 import {
-  CardContent,Typography,CardMedia, AppBar, Toolbar, 
-  Grid, FormControl, Button, Card, CardActions, InputLabel, Input
+  Typography, AppBar, Toolbar, 
+  Grid, FormControl, Button, InputLabel, Input
 } from '@material-ui/core';
 import {editData} from '../actions/contact';
-
+import {useForceUpdate} from '../utils/forceUpdate';
+import SimpleReactValidator from 'simple-react-validator';
 
 function EditContact(props) {
+  const validator = useRef(new SimpleReactValidator())
+  const forceUpdate = useForceUpdate();
 
   const data = props.location.state.data;
 const [contact, setContact] = React.useState({
@@ -17,7 +20,7 @@ const [contact, setContact] = React.useState({
   photo: data.photo
 });
 
-const [photo, setPhoto] = React.useState({});
+// const [photo, setPhoto] = React.useState({});
 const [base64, setBase64] = React.useState(data.photo);
 
 const image = (a)=>{
@@ -26,7 +29,7 @@ const image = (a)=>{
   let reader = new FileReader();
   reader.readAsDataURL(b);
   reader.onloadend = () => {
-    setPhoto(b);
+    // setPhoto(b);
     setBase64(reader.result)
   };
 
@@ -39,11 +42,17 @@ const image = (a)=>{
   }
 
   const editing = async(id,firstName,  lastName, age ,base64) => {
-    const newData = {
+    if (validator.current.allValid()) {
+      const newData = {
       firstName,  lastName, age , photo:base64
     }
     const res = await props.editData(id, newData);
     if(res)  props.history.push('/');
+  }
+ else {
+    validator.current.showMessages();
+    forceUpdate();
+  }
   }
 
   return (
@@ -82,13 +91,20 @@ const image = (a)=>{
             onChange={(e)=>{change("firstName", e.target.value)} }
           />
     </FormControl>
+    <div style={{color:"Red", fontSize: "12px"}}>
+          {validator.current.message('firstName',contact.firstName, 'required|min:3')}
+    </div>
     <FormControl fullWidth>
           <InputLabel htmlFor="standard-adornment-amount">Last Name</InputLabel>
           <Input
             value={contact.lastName}
-            onChange={(e)=>{change("lastname", e.target.value)}}
+            onChange={(e)=>{change("lastName", e.target.value)}}
           />
     </FormControl>
+    <div style={{color:"Red", fontSize: "12px"}}>
+
+          {validator.current.message('lastName',contact.lastName, 'required|min:3')}
+          </div>
     <FormControl fullWidth>
           <InputLabel htmlFor="standard-adornment-amount">Age</InputLabel>
           <Input
@@ -96,14 +112,13 @@ const image = (a)=>{
             onChange={(e)=>{change("age", e.target.value)}}
           />
     </FormControl>
+    <div style={{color:"Red", fontSize: "12px"}}>
+            {validator.current.message('age',contact.age, 'required|numeric')}
+            </div>
+
     <img style={{ height: 150,width: 150, objectFit: 'cover'}} src={base64} alt="Nothing here"/>
     <FormControl fullWidth>
     <input type="file" name="image" accept="image/*" onChange={(e)=>image(e)}/>
-          {/* <InputLabel htmlFor="standard-adornment-amount">Url Picture</InputLabel>
-          <Input
-            value={contact.photo}
-            onChange={(e)=>{change("photo", e.target.value)}}
-          /> */}
     </FormControl>
 
 
